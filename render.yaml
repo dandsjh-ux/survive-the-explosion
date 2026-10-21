@@ -1,0 +1,11 @@
+# Render Blueprint – https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: survive-the-explosion
+    runtime: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "22"

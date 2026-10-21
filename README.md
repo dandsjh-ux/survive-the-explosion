@@ -61,4 +61,4 @@ Rendering is kept light for tablets: low-poly shapes, `setPixelRatio(min(dpr, 2)
 
 ## Deploy to Render
 
-`render.yaml` at the repo root has a `survive-the-explosion` **static site** service (root `survive-the-explosion/`, build `npm install && npm run build`, publish `dist/`). In Render, sync the Blueprint (or choose **New → Blueprint** and select this repo) and Render creates the site. No server is needed, and static sites do not sleep like free web services.
+`render.yaml` describes a free **static site** (build `npm install && npm run build`, publish `dist/`). In Render choose **New → Blueprint**, select this repo, and Render creates the site. No server is needed, and static sites do not sleep like free web services.
