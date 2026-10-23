@@ -10,6 +10,7 @@ Everything is cartoon style. Nobody is hurt: a capybara family lives in the hous
 2. Read the briefing: how strong the explosion is, the dangers, and the new materials.
 3. Walk around the yard and place blocks with your coins. Stack them up to 3 high.
 4. Press **Ready!** and watch. Then read the result and do the quick quiz.
+5. Want more coins? Press **🧠 Word Quiz** while you build. Answer 20 word questions. Each right answer gives 20 coins. You can play it as many times as you like.
 
 ### Controls
 
@@ -48,6 +49,7 @@ src/scene/player.js         builder character, acceleration and collision, third
 src/scene/build.js          placed blocks (per-material look), ghost preview, stacking
 src/scene/explosion.js      pooled particles, fireball, shockwave ring, mushroom cloud, dust wall, flying blocks
 src/ui/*.js                 DOM screens, HUD, saved progress
+(src/ui/wordquiz.js is the Word Quiz overlay, src/data/vocab.js its questions)
 src/sim, src/data           pure simulation and game data (no rendering)
 ```
 
@@ -58,6 +60,7 @@ Rendering is kept light for tablets: low-poly shapes, `setPixelRatio(min(dpr, 2)
 `window.__game` exposes a small debug API: `state`, `level`, `result`, `coins`, `blocks`,
 `placeBlock(gx, gz, materialId)`, `toggleUpgrade(id)`, `ready()`, `skipToResults()`, `startLevel(id)`,
 `goto(name)`, `advance(seconds)` (runs the game clock without waiting), `tryAgain()`.
+Word Quiz: `openWordQuiz()`, `answerWordQuiz(index)`, `nextWordQuiz()`, `playAgainWordQuiz()`, `bonus` (coins won), `wordQuiz` (`{ index, answer, state, correct }`; index starts at 0).
 
 ## Deploy to Render
 

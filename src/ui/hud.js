@@ -17,10 +17,12 @@ export class Hud {
     this.menuBtn = h('button', { class: 'icon-btn', type: 'button', title: 'Levels', 'aria-label': 'Back to levels', onclick: () => this.hd.menu() }, '☰');
     this.levelName = h('div', { class: 'chip level-chip' });
     this.coins = h('div', { class: 'chip coins', 'aria-live': 'polite' });
+    this.quizBtn = h('button', { class: 'btn small quiz-btn', type: 'button', 'aria-label': 'Word Quiz: win coins', onclick: () => this.hd.quiz() },
+      h('span', { class: 'long' }, '🧠 Word Quiz +🪙'), h('span', { class: 'short' }, '🧠 +🪙'));
     this.threatsEl = h('div', { class: 'threat-chips' });
     this.helpBtn = h('button', { class: 'icon-btn', type: 'button', title: 'About this material', 'aria-label': 'About this material', onclick: () => this.showFact(true) }, '?');
     this.clearBtn = h('button', { class: 'btn small soft', type: 'button', onclick: () => this.hd.clear() }, 'Clear all');
-    this.top = h('div', { class: 'topbar' }, this.menuBtn, this.levelName, this.coins, h('div', { class: 'spacer' }), this.threatsEl, this.helpBtn, this.clearBtn);
+    this.top = h('div', { class: 'topbar' }, this.menuBtn, this.levelName, this.coins, this.quizBtn, h('div', { class: 'spacer' }), this.threatsEl, this.helpBtn, this.clearBtn);
 
     this.fact = h('div', { class: 'fact-banner' });
     this.hint = h('div', { class: 'hint' }, h('span', { class: 'only-keys' }, 'WASD walk · Space place · X remove · Q/E turn · Z/C zoom · R ready'),

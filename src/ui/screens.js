@@ -73,7 +73,8 @@ export function howToScreen({ onBack, onTeacher }) {
         h('li', {}, h('b', {}, 'Learn. '), 'Read how strong the explosion is and what dangers it makes.'),
         h('li', {}, h('b', {}, 'Build. '), 'Use your coins to build walls around the house. Stack blocks up to 3 high.'),
         h('li', {}, h('b', {}, 'Boom! '), 'Press Ready! and watch the explosion. Nobody is hurt in this game.'),
-        h('li', {}, h('b', {}, 'Check. '), 'Is the house safe? Try again with a better plan, then do the quiz.')),
+        h('li', {}, h('b', {}, 'Check. '), 'Is the house safe? Try again with a better plan, then do the quiz.'),
+        h('li', {}, h('b', {}, 'Word Quiz. '), 'Press 🧠 Word Quiz to answer 20 word questions. Each right answer gives you 20 coins! You can play it as many times as you like!')),
       h('div', { class: 'keytable' },
         h('div', { class: 'kt head' }, h('span', {}, 'Action'), h('span', {}, 'Keyboard and mouse'), h('span', {}, 'Touch')),
         keys.map(([a, k, t]) => h('div', { class: 'kt' }, h('b', {}, a), h('span', {}, k), h('span', {}, t)))),
@@ -142,7 +143,7 @@ export function threatChips(level) {
   });
 }
 
-export function briefingScreen({ level, onStart, onBack }) {
+export function briefingScreen({ level, onStart, onQuiz, onBack }) {
   const fresh = MATERIALS.filter((m) => m.unlockLevel === level.id);
   return screen('briefing',
     h('div', { class: 'card wide' },
@@ -160,7 +161,7 @@ export function briefingScreen({ level, onStart, onBack }) {
           h('div', { class: 'threats' }, threatChips(level)),
           h('h3', {}, level.id === 1 ? 'Your materials' : 'New materials!'),
           h('div', { class: 'chips' }, fresh.map((m) => h('span', { class: 'chip', style: { borderColor: hex(m.color) } }, `${m.emoji} ${m.name} · 🪙${m.cost}`))))),
-      h('div', { class: 'row' }, btn('← Back', onBack, 'soft'), btn('Start building →', onStart, 'big primary'))));
+      h('div', { class: 'row brief-row' }, btn('← Back', onBack, 'soft'), onQuiz && btn('🧠 Word Quiz: earn coins', onQuiz, 'soft quiz-start'), btn('Start building →', onStart, 'big primary'))));
 }
 
 // ------------------------------------------------------------ results

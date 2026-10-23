@@ -167,6 +167,63 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .explain { margin-top: 12px; background: #eaf6ff; border-radius: 14px; padding: 10px 14px; font-weight: 500; line-height: 1.4; }
 .quiz-score { font-size: 1.6rem; font-weight: 700; margin: 8px 0; }
 
+/* ---------- Word Quiz ---------- */
+.screen.wordquiz { z-index: 30; background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.3), rgba(20, 60, 110, 0.55)); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); }
+.card.wq { position: relative; max-width: 680px; padding: 18px 24px 20px; overflow-x: hidden; }
+.wq-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.wq-head .qprog { font-size: 1.1rem; margin: 0; }
+.wq-coins { display: inline-flex; align-items: center; gap: 6px; background: #fff3c4; border: 3px solid #ffd23f; border-radius: 999px; padding: 2px 14px; font-weight: 700; font-size: 1.15rem; min-height: 40px; }
+.wq-coins b { font-size: 1.35rem; }
+.wq-coins.bump { animation: bump 0.45s ease-out; }
+@keyframes bump { 0% { transform: scale(1); } 35% { transform: scale(1.28); background: #ffe27a; } 100% { transform: scale(1); } }
+.wq-bar { height: 10px; border-radius: 99px; background: #eadfc6; overflow: hidden; margin: 10px 0 12px; }
+.wq-bar i { display: block; height: 100%; border-radius: 99px; background: linear-gradient(90deg, #ffd23f, var(--orange)); transition: width 0.3s; }
+.wq-type { display: inline-block; font-size: 0.85rem; font-weight: 600; color: #1d5a85; background: #eaf6ff; border-radius: 99px; padding: 2px 12px; }
+.wq-q { margin: 8px 0 0 !important; font-size: 1.6rem !important; }
+.wq .opts { margin-top: 12px; gap: 9px; }
+.wq-opt { min-height: 60px; font-size: 1.15rem; touch-action: manipulation; width: 100%; }
+.wq-opt .letter { flex: 0 0 36px; height: 36px; }
+.wq-opt .otext { flex: 1; line-height: 1.2; }
+.wq-opt.right .letter { background: var(--green); color: #fff; }
+.wq-opt.wrong .letter { background: var(--red); color: #fff; }
+.wq-opt:disabled:not(.right):not(.wrong) { opacity: 0.55; }
+body.touch .wq-opt:hover { border-color: #eadfc6; }
+.wq-feedback { margin-top: 12px; border-radius: 14px; padding: 10px 14px; font-weight: 500; line-height: 1.35; animation: fadein 0.2s ease; }
+.wq-feedback.good { background: #e5f8e9; border: 3px solid #9fe0aa; }
+.wq-feedback.bad { background: #fdeceb; border: 3px solid #ffab9f; }
+.wq-row { justify-content: space-between; }
+.wq-row.center { justify-content: center; }
+.wq-next { margin-left: auto; }
+.coin-pop { position: absolute; right: 22px; top: 52px; font-size: 2rem; font-weight: 700; color: #c46500; text-shadow: 0 2px 0 #fff, 0 0 10px #fff; pointer-events: none; animation: coinpop 1.1s ease-out forwards; z-index: 2; }
+@keyframes coinpop { 0% { transform: translateY(14px) scale(0.5); opacity: 0; } 20% { transform: translateY(0) scale(1.25); opacity: 1; } 100% { transform: translateY(-46px) scale(1); opacity: 0; } }
+.wq-end { text-align: center; }
+.wq-trophy { font-size: 4rem; line-height: 1; animation: bob 2.5s ease-in-out infinite; }
+.wq-result { font-size: 1.7rem; font-weight: 700; margin: 6px 0 4px; }
+.wq-earned { display: inline-block; font-size: 2rem; font-weight: 700; color: #c46500; background: #fff3c4; border: 3px solid #ffd23f; border-radius: 999px; padding: 2px 22px; margin: 4px 0 10px; }
+.quiz-btn { background: #fff3c4; border: 3px solid #ffd23f; color: var(--ink); box-shadow: 0 4px 0 rgba(0, 0, 0, 0.14); min-height: 44px; font-weight: 700; padding: 4px 14px; white-space: nowrap; }
+.quiz-btn .short { display: none; }
+.quiz-btn:disabled { background: #e6f4e8; border-color: #a9dcb2; color: var(--green-d); cursor: default; box-shadow: none; opacity: 1; }
+.hud.locked .quiz-btn { pointer-events: none; }
+.brief-row { flex-wrap: wrap; }
+@media (max-width: 900px) { .brief-row { justify-content: center; } }
+@media (max-width: 700px) {
+  .quiz-btn .long { display: none; }
+  .quiz-btn .short { display: inline; }
+  .quiz-btn:disabled .short, .quiz-btn.done span { display: inline; }
+  .card.wq { padding: 14px 14px 16px; }
+  .wq-q { font-size: 1.35rem !important; }
+  .wq-opt { font-size: 1.05rem; padding: 8px 12px; }
+  .wq-feedback { font-size: 0.95rem; padding: 8px 12px; margin-top: 10px; }
+  .brief-row .btn { flex: 1 1 100%; }
+  .brief-row .big { order: -1; }
+}
+@media (max-height: 700px) {
+  .wq .opts { gap: 6px; }
+  .wq-opt { min-height: 56px; padding-top: 6px; padding-bottom: 6px; }
+  .wq-q { font-size: 1.3rem !important; }
+  .wq-bar { margin: 6px 0 8px; }
+}
+
 /* ---------- HUD ---------- */
 .hud { position: fixed; inset: 0; pointer-events: none; }
 .hud > * { pointer-events: auto; }
@@ -301,5 +358,5 @@ body.touch .joy-host { display: block; }
   .screen.results { justify-content: center; align-items: flex-end; background: linear-gradient(transparent 30%, rgba(20, 50, 90, 0.3)); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .logo-house, .countdown.pop { animation: none; }
+  .logo-house, .countdown.pop, .wq-trophy, .coin-pop, .wq-coins.bump { animation: none; }
 }

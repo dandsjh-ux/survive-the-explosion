@@ -6,6 +6,7 @@ import { BuildManager } from './scene/build.js';
 import { Effects } from './scene/explosion.js';
 import { Input } from './input.js';
 import { Hud } from './ui/hud.js';
+import { WordQuiz } from './ui/wordquiz.js';
 import {
   titleScreen, howToScreen, glossaryScreen, levelSelectScreen, briefingScreen,
   resultsPanel, quizScreen, finalScreen,
@@ -45,6 +46,7 @@ const G = {
   result: null,
   records: null,
   quizLevel: 0,
+  bonus: 0,          // coins won in the Word Quiz (this level only, no cap)
   countdown: null,
   stateTime: 0,
 };
@@ -57,6 +59,7 @@ const hud = new Hud(hudRoot, {
   remove: () => removeAtTarget(),
   ready: () => ready(),
   pick: (id) => pickMaterial(id),
+  quiz: () => openWordQuiz(),
 });
 // joystick lives inside the HUD
 input._makeJoystick(hud.joyHost);
@@ -67,11 +70,12 @@ function spent() {
   for (const u of G.upgrades) s += getMaterial(u).cost;
   return s;
 }
-const coinsLeft = () => G.level.budget - spent();
+const totalBudget = () => G.level.budget + G.bonus;
+const coinsLeft = () => totalBudget() - spent();
 
 function refreshHud() {
   const left = coinsLeft();
-  hud.setCoins(left, G.level.budget);
+  hud.setCoins(left, totalBudget());
   hud.setAffordable(left);
 }
 
@@ -115,6 +119,7 @@ function showWords(from) {
   showScreen(glossaryScreen({ onBack: () => (from === 'final' ? goFinal() : goTitle()) }));
 }
 function goLevels() {
+  if (wordQuiz.isOpen) wordQuiz.close(false);
   resetScene();
   setState('levelSelect');
   rig.orbit();
@@ -127,11 +132,17 @@ function goBriefing(idx) {
   startLevelData();
   setState('briefing');
   rig.orbit();
-  showScreen(briefingScreen({ level: G.level, onStart: () => startBuild(true), onBack: goLevels }));
+  showScreen(briefingScreen({
+    level: G.level,
+    onStart: () => startBuild(true),
+    onQuiz: () => { startBuild(true); openWordQuiz(); },
+    onBack: goLevels,
+  }));
 }
 
 function startLevelData() {
   G.upgrades.clear();
+  G.bonus = 0;
   build.setLevel(G.level);
   world.setLevelMarkers(G.level);
   hud.setLevel(G.level);
@@ -166,6 +177,24 @@ function startBuild(fresh) {
   if (fresh) hud.toast('Walk around and build a wall to protect the house!');
 }
 
+// ------------------------------------------------------------ word quiz
+const wordQuiz = new WordQuiz(screensEl, {
+  onCoins: (n) => { G.bonus += n; refreshHud(); },
+  onClose: () => {
+    if (G.state === 'build') { input.enabled = true; input.camEnabled = true; }
+    refreshHud();
+  },
+  budgetText: () => `Your budget is now ${totalBudget()} coins.`,
+});
+
+function openWordQuiz() {
+  if (G.state !== 'build' || wordQuiz.isOpen) return false;
+  input.enabled = false;
+  input.camEnabled = false;
+  input.keys && input.keys.clear();
+  return wordQuiz.open();
+}
+
 // ------------------------------------------------------------ building
 function pickMaterial(id) {
   const m = getMaterial(id);
@@ -177,6 +206,7 @@ function pickMaterial(id) {
 }
 
 function toggleUpgrade(id) {
+  if (wordQuiz.isOpen) return false;
   const m = getMaterial(id);
   if (!m || m.kind !== 'upgrade' || m.unlockLevel > G.level.id) return false;
   if (G.upgrades.has(id)) {
@@ -219,7 +249,7 @@ function whyNot(gx, gz, materialId) {
 }
 
 function placeAt(gx, gz, materialId = G.selected, quiet = false) {
-  if (G.state !== 'build') return false;
+  if (G.state !== 'build' || wordQuiz.isOpen) return false;
   const why = whyNot(gx, gz, materialId);
   if (why) { if (!quiet) hud.toast(why, 'warn'); return false; }
   build.add(gx, gz, materialId, true);
@@ -227,7 +257,7 @@ function placeAt(gx, gz, materialId = G.selected, quiet = false) {
   return true;
 }
 function removeAt(gx, gz) {
-  if (G.state !== 'build') return false;
+  if (G.state !== 'build' || wordQuiz.isOpen) return false;
   const rec = build.removeTop(gx, gz);
   if (!rec) { hud.toast('Nothing to remove here.', 'warn'); return false; }
   refreshHud();
@@ -241,7 +271,7 @@ function removeAtTarget() {
   return removeAt(c.gx, c.gz);
 }
 function clearAll() {
-  if (G.state !== 'build') return;
+  if (G.state !== 'build' || wordQuiz.isOpen) return;
   const n = build.blocks.size;
   build.clear();
   G.upgrades.clear();
@@ -256,7 +286,7 @@ const ndc = new THREE.Vector2();
 const groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
 const hitPt = new THREE.Vector3();
 input.onTap = (cx, cy, button) => {
-  if (G.state !== 'build') return;
+  if (G.state !== 'build' || wordQuiz.isOpen) return;
   const r = canvas.getBoundingClientRect();
   ndc.set(((cx - r.left) / r.width) * 2 - 1, -((cy - r.top) / r.height) * 2 + 1);
   raycaster.setFromCamera(ndc, world.camera);
@@ -284,7 +314,7 @@ input.on('nextMaterial', () => {
   const i = blocks.findIndex((m) => m.id === G.selected);
   pickMaterial(blocks[(i + 1) % blocks.length].id);
 });
-input.on('escape', () => { if (G.state === 'build') goLevels(); });
+input.on('escape', () => { if (G.state === 'build' && !wordQuiz.isOpen) goLevels(); });
 
 // ------------------------------------------------------------ countdown + explosion
 const SHOTS = {
@@ -295,7 +325,7 @@ const SHOTS = {
 function shotFor(level) { return SHOTS[level.key] || SHOTS.grenade; }
 
 function ready() {
-  if (G.state !== 'build') return false;
+  if (G.state !== 'build' || wordQuiz.isOpen) return false;
   setState('countdown');
   hud.show(false);
   G.countdown = { t: 0, n: 4, walkT: 0 };
@@ -324,7 +354,7 @@ function updateCountdown(dt) {
 }
 
 function evaluate() {
-  return simulateBlast(G.level, build.placements(), [...G.upgrades]);
+  return simulateBlast({ ...G.level, budget: totalBudget() }, build.placements(), [...G.upgrades]);
 }
 
 function startExplosion() {
@@ -419,6 +449,14 @@ window.__game = {
   get level() { return G.level.id; },
   get result() { return G.result; },
   get coins() { return coinsLeft(); },
+  get bonus() { return G.bonus; },
+  get wordQuiz() {
+    return { index: wordQuiz.index, answer: wordQuiz.current ? wordQuiz.current.answer : -1, state: wordQuiz.phase, correct: wordQuiz.correct };
+  },
+  openWordQuiz() { return openWordQuiz(); },
+  answerWordQuiz(i) { return wordQuiz.answer(i); },
+  nextWordQuiz() { return wordQuiz.next(); },
+  playAgainWordQuiz() { return wordQuiz.playAgain(); },
   get player() { return { x: player.pos.x, z: player.pos.y, facing: player.facing }; },
   get blocks() { return build.placements(); },
   get upgrades() { return [...G.upgrades]; },
